@@ -98,6 +98,9 @@ app.post('/webhook', async (req, res) => {
           await handleSpeakEnded(callControlId, callId);
         }
         break;
+      case 'call.dtmf.received':
+        await handleGatherSpeech(callControlId, callId, payload);
+        break;
       case 'call.gather.ended':
         await handleGatherEnded(callControlId, callId, payload);
         break;
@@ -230,6 +233,20 @@ async function handleGatherEnded(callControlId, callId, payload) {
     );
     setTimeout(() => telnyxService.hangupCall(callControlId), 3000);
   }
+}
+
+async function handleGatherSpeech(callControlId, callId, payload) {
+  const call = activeCalls.get(callId);
+  if (!call) return;
+
+  const speech = payload.speakText;
+  logger.info(`📞 Voz recibida: ${speech}`);
+
+  await telnyxService.speakText(
+    callControlId,
+    speech, //"Puede decir o marcar su número de expediente seguido de numeral",
+    VOICE_CONFIG.BIENVENIDA
+  );
 }
 
 async function procesarOpcionMenu(callControlId, callId, opcion) {

@@ -80,6 +80,22 @@ class TelnyxService {
     }
   }
 
+  async gatherSpeech(callControlId, prompt, language = 'es-MX') {
+    const encodedId = encodeURIComponent(callControlId);
+    try {
+      await this.telnyxApi.post(`/calls/${encodedId}/actions/gather_using_speech`, {
+        payload: prompt,
+        language: language,
+        speech_timeout: 5, // Segundos de espera después de hablar
+        client_state: Buffer.from('speech').toString('base64'),
+        command_id: `speech_${Date.now()}`
+      });
+    } catch (error) {
+      console.error('Error en gatherSpeech:', error.message);
+      throw error;
+    }
+  }
+
   // ... resto de los métodos permanecen iguales ...
   
   async answerCall(callControlId) {
